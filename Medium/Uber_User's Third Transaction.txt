@@ -1,0 +1,6 @@
+with data1 as (
+select *,dense_rank() over(PARTITION BY user_id order by transaction_date) as rnk 
+from transactions 
+)
+
+select user_id,spend,transaction_date from data1 where rnk=3
