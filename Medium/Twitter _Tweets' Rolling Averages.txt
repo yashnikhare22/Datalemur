@@ -1,0 +1,11 @@
+with data1 as (
+select * from (
+select *,
+count(user_id) over(PARTITION BY user_id,tweet_date order by tweet_date) as cnt,
+row_number() over(PARTITION BY user_id,tweet_date order by tweet_date) as rn
+from tweets ) x where x.rn=1 ),
+data2 as (
+select user_id,tweet_date, avg(cnt) over(PARTITION BY user_id order by tweet_date
+rows BETWEEN 2 preceding and current row) as avg_ from data1)
+
+select user_id,tweet_date,ROUND(avg_,2) as rolling_avg_3days from data2
