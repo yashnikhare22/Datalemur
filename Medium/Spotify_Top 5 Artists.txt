@@ -1,0 +1,10 @@
+with data1 as (
+select *,row_number() over(partition by artist_id) rn from (
+select artist_id,count(rank) over(partition by artist_id) as cnt
+from global_song_rank gs join songs s on gs.song_id=s.song_id WHERE
+rank<11 ) x),
+data2 as (
+select artist_name,dense_rank() over(order by cnt desc) as rankings 
+from data1 d1 join artists a on d1.artist_id=a.artist_id  where rn=1)
+
+select * from data2 where rankings<6 order by rankings,artist_name 
