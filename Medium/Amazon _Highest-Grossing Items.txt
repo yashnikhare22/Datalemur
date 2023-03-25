@@ -1,0 +1,10 @@
+with data1 as (
+select category,product,tot_spend,dense_rank() over(PARTITION BY category ORDER BY
+tot_spend desc) as rnk from (
+select *,sum(spend) over(PARTITION BY category,product) as tot_spend FROM 
+product_spend where EXTRACT(year from transaction_date)=2022 ) x ),
+data2 as (
+select *,row_number() over(PARTITION BY category,product) as rn from data1
+)
+select category,product,tot_spend from data2 where rn=1 and rnk<3
+order by category,tot_spend desc
