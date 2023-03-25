@@ -1,0 +1,21 @@
+with data1 as (
+select age_bucket,activity_type,time_spent from activities a join age_breakdown ab ON
+a.user_id=ab.user_id
+),
+data2 as (
+select *,(time_sending+time_opening) as total_time, row_number() over(PARTITION BY 
+age_bucket) as rn
+from (
+select *,sum(case when activity_type='send' then time_spent else 0 end)
+over(partition by age_bucket) as time_sending,
+sum(case when activity_type='open' then time_spent else 0 end)
+over(partition by age_bucket) as time_opening
+from data1
+) x  )
+
+select age_bucket,round(((time_sending/total_time)*100.0),2) AS send_perc,
+round(((time_opening/total_time)*100.0),2) AS open_perc
+from data2 where rn=1
+
+
+
