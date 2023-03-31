@@ -1,0 +1,11 @@
+with data1 as (
+SELECT p.caller_id,p.receiver_id,pi1.country_id as c1,pi2.country_id as c2 FROM phone_calls p JOIN
+phone_info pi1 on p.caller_id=pi1.caller_id join phone_info pi2 on p.receiver_id=
+pi2.caller_id
+
+),
+data2 as (
+select sum(case when c1<>c2 then 1 else 0 end) over() *1.0 /count(caller_id) over()*1.0 as international_calls_pct
+from data1 )
+select round((international_calls_pct*100.0),1) as international_calls_pct from data2
+limit 1
