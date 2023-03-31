@@ -1,0 +1,15 @@
+with data1 as (
+select product_id,product_category,product_name,
+sum(case when cnt=1 then 1 else 0 end ) over() as  dist_cnt from (
+select *,row_number() over(partition by product_category) as cnt from 
+products ) x
+),
+data2 as (
+select *,sum(rn) over(PARTITION BY customer_id) as tot from( 
+select customer_id,product_category,
+row_number() over(PARTITION BY customer_id,product_category) as rn,dist_cnt
+from customer_contracts c join data1 d1 on c.product_id=d1.product_id 
+order by customer_id ) x)
+
+select DISTINCT(customer_id) as customer_id from data2 where tot=dist_cnt
+
