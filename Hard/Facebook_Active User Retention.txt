@@ -1,0 +1,14 @@
+with data1 as 
+(select *, EXTRACT(month from event_date) as mnt
+from user_actions where EXTRACT(month from event_date) BETWEEN 6 and 7
+order by user_id,mnt ),
+data2 as (
+select *,dense_rank() over(PARTITION BY user_id order by mnt) as cnt,
+row_number() over(PARTITION BY user_id,mnt order by mnt) as rn
+from data1
+),
+data3 as (
+select user_id,event_type,event_date,mnt,count(user_id) over(PARTITION BY user_id) as cnt1 
+from data2 where rn=1)
+select mnt,count(user_id) as monthly_active_users from (
+select user_id,mnt from data3 where cnt1=2 )x where mnt=7 group by mnt
