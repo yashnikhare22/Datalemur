@@ -1,0 +1,9 @@
+with data1 as (
+select product_id,EXTRACT(year from transaction_date) as year,spend 
+from user_transactions ),
+data2 as (
+select *,lag(spend) over(PARTITION BY product_id order by year) as prev FROM
+data1)
+
+select year,product_id,spend as curr_year_spend,prev as prev_year_spend
+,round(((spend-prev)/prev)*100,2) as yoy_rate from data2
