@@ -1,0 +1,13 @@
+with data1 as (
+select measurement_time,
+EXTRACT( day from measurement_time) as day,measurement_value,
+dense_rank() over(PARTITION BY EXTRACT( day from measurement_time) order by measurement_time) as rnk
+from measurements
+order by measurement_time)
+
+select measurement_time,odd_sum,even_sum from (
+select *, sum(case when rnk%2<>0 then measurement_value else 0 end ) 
+over(PARTITION BY day) as odd_sum,
+sum(case when rnk%2=0 then measurement_value else 0 end ) 
+over(PARTITION BY day) as even_sum from data1) x where rnk=1
+
