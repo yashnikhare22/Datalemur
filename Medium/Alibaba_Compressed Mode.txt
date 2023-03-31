@@ -1,0 +1,4 @@
+with data1 as (
+select *,max(order_occurrences) over() as mx from items_per_order 
+)
+select item_count from data1 where order_occurrences=mx
