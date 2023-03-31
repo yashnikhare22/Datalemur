@@ -1,0 +1,11 @@
+with data1 as (
+select p1.topping_name t1,p1.ingredient_cost c1,p2.topping_name t2,p2.ingredient_cost c2
+from
+pizza_toppings p1 join pizza_toppings p2 on p1.topping_name<p2.topping_name
+order by p1.topping_name,p2.topping_name
+),
+data2 as (
+SELECT t1,t2,(c1+c2+p3.ingredient_cost) as cost,p3.topping_name as t3,p3.ingredient_cost as c3
+from data1 join pizza_toppings p3 on t2<p3.topping_name
+order by cost desc)
+select concat(t1,',',t2,',',t3) as pizza,cost from data2 order by cost desc,pizza
