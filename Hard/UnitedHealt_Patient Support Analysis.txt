@@ -1,0 +1,7 @@
+with data1 as (
+select policy_holder_id,call_received,lead(call_received) over(PARTITION BY policy_holder_id
+order by call_received) as nxt_call from callers ),
+data2 as (
+select *,EXTRACT(days from (nxt_call-call_received)) as days
+from data1)
+select count(DISTINCT(policy_holder_id)) from data2 where days<7
