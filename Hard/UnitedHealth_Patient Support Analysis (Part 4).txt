@@ -1,0 +1,10 @@
+with data1 as (
+select *,count(call_duration_secs) over(PARTITION BY mnt) as cnt,
+row_number() OVER(PARTITION BY mnt) as rn
+from (
+SELECT EXTRACT(year from call_received) as year, EXTRACT(month from call_received) as mnt,
+call_duration_secs from callers where call_duration_secs>=300  order by mnt ) x)
+select year,mnt,
+round(((cnt*1.0-lag(cnt) over(order by mnt)*1.0)/lag(cnt) over(order by mnt)*1.0)*100.0,1)
+
+from data1 where rn=1
